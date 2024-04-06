@@ -2,6 +2,7 @@ import VueRouter from 'vue-router'
 import MainContainer from "@/components/mainContainer";
 import articlePanel from "@/components/articlePanel";
 import musicPage from "@/components/musicPage";
+import toolPage from "@/components/toolPage";
 export default new VueRouter({
     routes:[
         {
@@ -16,7 +17,11 @@ export default new VueRouter({
                 {
                     path:'music',
                     component:musicPage
-                }
+                },
+                {
+                    path:'tool',
+                    component:toolPage
+                },
             ]
         }
     ]

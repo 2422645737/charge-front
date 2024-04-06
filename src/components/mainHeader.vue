@@ -9,7 +9,7 @@
         </div>
 
         <div class="headerItem">
-            工具
+            <router-link to="tool" class="link">工具</router-link>
         </div>
 
         <div class="headerItem">

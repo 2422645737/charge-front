@@ -15,13 +15,13 @@ export default {
     height: 100%;
     width: 100%;
     background-color: #ffffff;
-    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0, rgba(60, 64, 67, 0.15) 0 2px 6px 2px;
 
     border-radius: 3px;
 
     margin: 1px 1px;
 
-    padding: 0px;
+    padding: 0;
 
     display: flex;
     align-items: center;

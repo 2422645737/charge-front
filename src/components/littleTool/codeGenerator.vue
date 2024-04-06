@@ -31,22 +31,28 @@
             <input v-model="comment" class="input"/>
         </div>
 
-        <button class="addButton" @click="addField()">添加</button>
+        <el-button class="addButton" type="primary" @click.prevent="addField()">添加</el-button>
     </form>
 
     <!--表结构-->
     <table class="fieldTable">
         <tr>
-            <th>字段名</th>
-            <th>类型</th>
-            <th>注释</th>
+            <th class="fieldTitle">字段名</th>
+            <th class="fieldTitle">类型</th>
+            <th class="fieldTitle">注释</th>
+            <th class="fieldTitle">操作</th>
         </tr>
         <tr v-for="(item,index) in this.finalList" :key="index">
             <td class="filedInfo">{{item.fieldName}}</td>
             <td class="filedInfo">{{item.className}}</td>
             <td class="filedInfo">{{item.comment}}</td>
-            <td>
-                <div></div>
+            <td class="operate_field">
+                <div class="operate_box">
+                    <el-button type="primary" class="opearete_button" size="mini" @click="upItem(item,index)">▲</el-button>
+                    <el-button type="primary" class="opearete_button" size="mini" @click="downItem(item,index)">▼</el-button>
+                    <el-button type="danger"  class="opearete_button" size="mini" @click="deleteItem(item,index)">⨉</el-button>
+                </div>
+
             </td>
         </tr>
     </table>
@@ -62,6 +68,7 @@
 
 <script>
 import markdownPreview from "@/components/littleTool/markdownPreview";
+
 export default {
     name: "codeGenerator",
     components:{
@@ -95,34 +102,37 @@ export default {
     },
     mounted() {
         //初始化类型
-        this.defaultClass.push({value:'int8',type:'int8'})
-        this.defaultClass.push({value:'varchar()',type:'varchar()'})
-        this.defaultClass.push({value:'timestamp',type:'timestamp'})
+        this.defaultClass.push({value:'INT8',type:'INT8'})
+        this.defaultClass.push({value:'VARCHAR()',type:'VARCHAR()'})
+        this.defaultClass.push({value:'TIMESTAMP',type:'TIMESTAMP'})
         //初始化变量
-        this.defaultList.push({fieldName: 'invalid_flag', className: 'varchar(1)',comment:'作废标识'});
-        this.defaultList.push({fieldName: 'hospital_id', className: 'int8',comment:'医院id'});
-        this.defaultList.push({fieldName: 'his_org_id', className: 'int8',comment:'机构ID'});
-        this.defaultList.push({fieldName: 'his_creater_id', className: 'int8',comment:'创建人身份ID'});
-        this.defaultList.push({fieldName: 'his_creater_name', className: 'varchar(64)',comment:'创建人名称'});
+        this.defaultList.push({fieldName: 'invalid_flag', className: 'VARCHAR(1)',comment:'作废标识'});
+        this.defaultList.push({fieldName: 'hospital_id', className: 'INT8',comment:'医院id'});
+        this.defaultList.push({fieldName: 'his_org_id', className: 'INT8',comment:'机构ID'});
+        this.defaultList.push({fieldName: 'his_creater_id', className: 'INT8',comment:'创建人身份ID'});
+        this.defaultList.push({fieldName: 'his_creater_name', className: 'VARCHAR(64)',comment:'创建人名称'});
         this.defaultList.push({fieldName: 'his_create_time', className: 'TIMESTAMP',comment:'创建时间'});
-        this.defaultList.push({fieldName: 'his_updater_id', className: 'int8',comment:'更新用户ID'});
+        this.defaultList.push({fieldName: 'his_updater_id', className: 'INT8',comment:'更新用户ID'});
         this.defaultList.push({fieldName: 'his_update_time', className: 'TIMESTAMP',comment:'更新时间'});
-        this.defaultList.push({fieldName: 'version', className: 'int2',comment:'乐观锁标志'});
+        this.defaultList.push({fieldName: 'version', className: 'INT2',comment:'乐观锁标志'});
 
         this.generateSQL();
     },
     methods: {
         //生成SQL语句
-        generateSQL(){
-            this.finalList = this.insertList.concat(this.defaultList)
+        generateSQL(reGenerateFinalList){
+            //reGenerateFinalList：是否重新生成finalList数组
+            if(reGenerateFinalList === undefined || reGenerateFinalList === true){
+                this.finalList = this.insertList.concat(this.defaultList)
+            }
             this.sqlStatement = ''
             this.sqlStatement = '```sql\n'
             this.sqlStatement += "CREATE TABLE IF NOT EXISTS mz." + this.tableName + "(\n";
             this.finalList.forEach(item => {
                 this.sqlStatement += ( '\t' + item.fieldName + ' ' + item.className + ' NOT NULL DEFAULT ');
-                if(item.className.indexOf('int') !== -1){
+                if(item.className.indexOf('INT') !== -1){
                     this.sqlStatement += '0,\n'
-                }else if(item.className.indexOf('varchar') !== -1){
+                }else if(item.className.indexOf('VARCHAR') !== -1){
                     this.sqlStatement += '\'\',\n'
                 }else if(item.className === 'TIMESTAMP' || item.className === 'timestamp'){
                     this.sqlStatement += 'CURRENT_TIMESTAMP,\n'
@@ -161,6 +171,40 @@ export default {
             let temp =  queryString ? list.filter((e) => {return e.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0}) : list;
             cb(temp);
 
+        },
+
+        //上移元素
+        upItem(item,index){
+            if(index === 0)return;
+            console.log(item,index)
+            //获取当前元素
+            let currentItem = this.finalList[index];
+            let temp = this.finalList[index - 1];
+
+            console.log(temp)
+            this.finalList[index - 1] = currentItem;
+            this.finalList[index] = temp;
+
+            console.log(this.finalList)
+
+            this.generateSQL(false);
+        },
+        //下移元素
+        downItem(item,index){
+            if(index === this.finalList.length - 1)return;
+            //获取当前元素
+            let currentItem = this.finalList[index];
+            let temp = this.finalList[index + 1];
+
+            this.finalList[index + 1] = currentItem;
+            this.finalList[index] = temp;
+
+            this.generateSQL(false);
+        },
+        //删除元素
+        deleteItem(item,index){
+            this.finalList.splice(index,1);
+            this.generateSQL(false)
         }
     },
     watch:{
@@ -180,18 +224,20 @@ export default {
 .addButton{
     margin-left: 20px;
 }
-.sqlStatement{
-    width: 100%;
-    height: 300px;
-    font-size: 18px;
-    margin-bottom: 100px;
+.addButton:hover{
+    cursor: pointer;
 }
 .fieldTable{
     width: 100%;
-    border:1px solid red;
+    border: 1px solid #0f86e8;
+    border-collapse: collapse;
 }
 .filedInfo{
-    border: 1px solid #b79797;
+    border: 1px solid #0f86e8;
+    font-size: 18px;
+    height: 30px;
+    letter-spacing: 1px;
+    padding-left: 10px;
 }
 .title{
     font-size: 20px;
@@ -205,7 +251,7 @@ export default {
     margin-bottom: 50px;
 }
 .inline-input{
-    width: 200px;
+    width: 260px;
 }
 .propertyName{
     width: 60px;
@@ -214,6 +260,7 @@ export default {
     margin-right: 10px;
     font-weight: bold;
     padding-top: 3px;
+    font-size: 17px;
 }
 
 .form{
@@ -227,8 +274,42 @@ export default {
     height: 30px;
     width: 400px;
     display: flex;
+    align-items: center;
+    justify-content: start;
+
 }
 .input{
     font-size: 19px;
+    border: #dad7d7 solid 1px;
+    height: 34px;
+    border-radius: 3px;
+    width: 245px;
+    outline: none;
+    padding-left: 10px;
+    letter-spacing: 1px;
+}
+.input:focus{
+    border: #66c6f3 solid 1px;
+}
+.fieldTitle{
+    font-size: 19px;
+    letter-spacing: 1px;
+    text-align: center;
+    border: 1px solid #0f86e8;
+}
+.operate_field{
+    outline: none;
+    border: 1px solid #0f86e8;
+    font-size: 18px;
+    height: 30px;
+    letter-spacing: 1px;
+}
+.operate_box{
+    border: none;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

@@ -12,7 +12,8 @@ module.exports = {
               'css',
               'javascript',
               'cpp',
-              'java'
+              'java',
+              'sql'
           ],
           plugins:[
               'line-numbers',

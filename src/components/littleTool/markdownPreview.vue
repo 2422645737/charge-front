@@ -7,6 +7,7 @@
 <script>
 import {marked} from "marked"
 import prism from "prismjs"
+
 export default {
     name: "MarkdownPreview",
 
@@ -19,12 +20,10 @@ export default {
         }
     },
     mounted() {
-        console.log('哈哈哈哈' + this.content)
         this.md = this.content;
         const reg = new RegExp("<pre", "g");
         const temp = marked(this.md);
-        const str = temp.replace(reg, `<pre class = "line-numbers"`);
-        this.md = str;
+        this.md = temp.replace(reg, `<pre class = "line-numbers"`);
         setTimeout(() => {
             prism.highlightAll();
         },0)
@@ -40,8 +39,7 @@ export default {
             this.md = this.content;
             const reg = new RegExp("<pre", "g");
             const temp = marked(this.md);
-            const str = temp.replace(reg, `<pre class = "line-numbers"`);
-            this.md = str;
+            this.md = temp.replace(reg, `<pre class = "line-numbers"`);
             setTimeout(() => {
                 prism.highlightAll();
             },0)
